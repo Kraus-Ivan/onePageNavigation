@@ -1,120 +1,135 @@
-document.addEventListener("DOMContentLoaded", () => {
+export default function autonav(header, isDropdown) {
+    // Položka v menu
+    function createMenuItem(id, text, isDropdown=false) {
+        const menuItem = document.createElement("li");
+        menuItem.classList.add("menu__item");
 
-  
-  function createMenuItem(id, text, isDropdown=false) {
-      const menuItem = document.createElement("li");
-      menuItem.classList.add("menu__item");
-      if (isDropdown) {
-          menuItem.classList.add("menu__item--dropdown");
-          const pElement = document.createElement("p");
-          pElement.textContent = text;
-          menuItem.appendChild(pElement);
+        const anchor = document.createElement("a");
+        anchor.textContent = text;
+        anchor.href = `#${id}`;
 
-          const dropdownMenu = document.createElement("div");
-          dropdownMenu.classList.add("dropdown-menu");
-          menuItem.appendChild(dropdownMenu);
-      } else {
-          const anchor = document.createElement("a");
-          anchor.textContent = text;
-          anchor.href = `#${id}`;
-          menuItem.appendChild(anchor);
-      }
+        if (isDropdown) {
+            menuItem.classList.add("menu__item--dropdown");
 
-      return menuItem;
-  }
+            const pElement = document.createElement("p");
+            pElement.textContent = text;
+            menuItem.appendChild(pElement);
 
-  function createDropdownMenuItem(id, text) {
-      const anchor = document.createElement("a");
-      anchor.textContent = text;
-      anchor.href = `#${id}`;
-      return anchor;
-  }
+            const dropdownMenu = document.createElement("div");
+            dropdownMenu.classList.add("dropdown-menu");
 
-  const header = document.createElement("header");
-  header.classList.add("header");
+            const h2DropdownItem = createDropdownMenuItem(id, text);  // Odkaz na h2 element
+            dropdownMenu.appendChild(h2DropdownItem);
 
-  const navigation = document.createElement("nav");
-  navigation.classList.add("navigation");
+            menuItem.appendChild(dropdownMenu);
+        } else {
+            menuItem.appendChild(anchor);
+        }
 
-  const logoDiv = document.createElement("div");
-  logoDiv.classList.add("navigation__logo");
+        return menuItem;
+    }
 
-  const logoLink = document.createElement("a");
-  logoLink.href = "./index.html";
+    // Položka v dropdown menu
+    function createDropdownMenuItem(id, text) {
+        const anchor = document.createElement("a");
+        anchor.textContent = text;
+        anchor.href = `#${id}`;
+        return anchor;
+    }
+    
+    const navigation = document.createElement("nav");
+    navigation.classList.add("navigation");
 
-  const logoSpan = document.createElement("span");
-  logoSpan.textContent = "AutoNav";
+    const logoDiv = document.createElement("div");
+    logoDiv.classList.add("navigation__logo");
 
-  logoLink.appendChild(logoSpan);
-  logoDiv.appendChild(logoLink);
+    const logoLink = document.createElement("a");
+    logoLink.href = "./index.html";
 
-  navigation.appendChild(logoDiv);
+    const logoSpan = document.createElement("span");
+    logoSpan.textContent = "AutoNav";
 
-  const navigationMenu = document.createElement("menu");
-  navigationMenu.classList.add("navigation__menu");
+    logoLink.appendChild(logoSpan);
+    logoDiv.appendChild(logoLink);
 
-  const sections = Array.from(document.querySelectorAll("section"));
+    navigation.appendChild(logoDiv);
 
-  sections.forEach(section => {
-      const children = Array.from(section.children);
-      let lastH2Item = null;
+    const navigationMenu = document.createElement("ul");
+    navigationMenu.classList.add("navigation__menu");
 
-      children.forEach(child => {
-          if (child.tagName === "H2") {
-              const menuItem = createMenuItem(child.id, child.textContent, true);
-              navigationMenu.appendChild(menuItem);
-              lastH2Item = menuItem;
-          } else if (child.tagName === "H3" && lastH2Item) {
-              const dropdownMenu = lastH2Item.querySelector(".dropdown-menu");
-              const dropdownItem = createDropdownMenuItem(child.id, child.textContent);
-              dropdownMenu.appendChild(dropdownItem);
-          }
-      });
-  });
+    const h2s = Array.from(document.querySelectorAll("h2"));
+    let lastH2Item = null;
 
-  navigation.appendChild(navigationMenu);
+    // Projde a přidá h2 do menu
+    h2s.forEach(h2 => {
+        const siblings = Array.from(h2.parentElement.children);
+        const index = siblings.indexOf(h2);
+        const nextItems = siblings.slice(index + 1);
+        const nextH3Items = nextItems.filter(item => item.tagName === "H3");
+    
+        if (isDropdown && nextH3Items.length > 0) {
+            const menuItem = createMenuItem(h2.id, h2.textContent, true);
+            navigationMenu.appendChild(menuItem);
+            lastH2Item = menuItem;
+    
+            nextH3Items.forEach(nextItem => {
+                const dropdownMenu = lastH2Item.querySelector(".dropdown-menu");
+                const dropdownItem = createDropdownMenuItem(nextItem.id, nextItem.textContent);
+                dropdownMenu.appendChild(dropdownItem);
+            });
+        } else {
+            const menuItem = createMenuItem(h2.id, h2.textContent, false);
+            navigationMenu.appendChild(menuItem);
+        }
+    });
+    
 
-  const hamburgerDiv = document.createElement("div");
-  hamburgerDiv.classList.add("navigation__hamburger");
+    navigation.appendChild(navigationMenu);
 
-  for (let i = 0; i < 3; i++) {
-      const barSpan = document.createElement("span");
-      barSpan.classList.add("bar");
-      hamburgerDiv.appendChild(barSpan);
-  }
+    const hamburgerDiv = document.createElement("div");
+    hamburgerDiv.classList.add("navigation__hamburger");
 
-  navigation.appendChild(hamburgerDiv);
+    for (let i = 0; i < 3; i++) {
+        const barSpan = document.createElement("span");
+        barSpan.classList.add("bar");
+        hamburgerDiv.appendChild(barSpan);
+    }
 
-  header.appendChild(navigation);
+    navigation.appendChild(hamburgerDiv);
 
-  document.body.insertBefore(header, document.body.firstChild);
+    header.appendChild(navigation);
 
-  const hamburger = document.querySelector(".navigation__hamburger");
-  const navMenu = document.querySelector(".navigation__menu");
-  const dropdowns = document.querySelectorAll(".menu__item--dropdown");
+    // Přidá hotové menu do stránky
+    document.body.insertBefore(header, document.body.firstChild);
 
-  if (hamburger && navMenu) {
-      hamburger.addEventListener("click", () => {
-          hamburger.classList.toggle("active");
-          navMenu.classList.toggle("active");
 
-          const bars = document.querySelectorAll(".bar");
-          bars.forEach((bar) => {
-              bar.classList.toggle("bar--cross");
-          });
-      });
-  }
+    // Funkčnost navigace
+    const hamburger = document.querySelector(".navigation__hamburger");
+    const navMenu = document.querySelector(".navigation__menu");
+    const dropdowns = document.querySelectorAll(".menu__item--dropdown");
 
-  if (dropdowns) {
-      dropdowns.forEach((dropdown) => {
-          dropdown.addEventListener("click", () => {
-              if (window.innerWidth <= 1024) {
-                  const menu = dropdown.querySelector(".dropdown-menu");
-                  if (menu) {
-                      menu.classList.toggle("open");
-                  }
-              }
-          });
-      });
-  }
-});
+    if (hamburger && navMenu) {
+        // hamburger menu
+        hamburger.addEventListener("click", () => {
+            hamburger.classList.toggle("active");
+            navMenu.classList.toggle("active");
+
+            const bars = document.querySelectorAll(".bar");
+            bars.forEach((bar) => {
+                bar.classList.toggle("bar--cross");
+            });
+        });
+    }
+
+    if (dropdowns) {
+        // dropdown menu aktivace
+        dropdowns.forEach((dropdown) => {
+            dropdown.addEventListener("click", () => {
+                const dropdownMenu = dropdown.querySelector(".dropdown-menu");
+                if (dropdownMenu) {
+                    dropdownMenu.classList.toggle("open");
+                }
+            });
+        });
+    }
+}
