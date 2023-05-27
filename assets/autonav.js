@@ -1,42 +1,63 @@
 export default function autonav(header, isDropdown, websiteName, logoImage) {
-    // Položka v menu
-    function createMenuItem(id, text, isDropdown=false) {
+    const createMenuItem = (id, text, isDropdown) => {
         const menuItem = document.createElement("li");
         menuItem.classList.add("menu__item");
-
+    
         const anchor = document.createElement("a");
         anchor.textContent = text;
         anchor.href = `#${id}`;
-
+    
         if (isDropdown) {
             menuItem.classList.add("menu__item--dropdown");
-
-            const pElement = document.createElement("p");
-            pElement.textContent = text;
-            menuItem.appendChild(pElement);
-
+    
+            const arrowSpanContainer = document.createElement("span");
+            arrowSpanContainer.classList.add("dropdown-arrow-container");
+    
+            const arrowSpan = document.createElement("span");
+            arrowSpan.classList.add("dropdown-arrow");
+    
+            arrowSpanContainer.appendChild(arrowSpan);
+            arrowSpanContainer.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                const dropdownMenu = this.parentNode.parentNode.querySelector(".dropdown-menu");
+                if (dropdownMenu) {
+                    dropdownMenu.classList.toggle("open");
+                    this.firstChild.classList.toggle("open");
+                }
+            });
+    
             const dropdownMenu = document.createElement("div");
             dropdownMenu.classList.add("dropdown-menu");
-
-            const h2DropdownItem = createDropdownMenuItem(id, text);  // Odkaz na h2 element
-            dropdownMenu.appendChild(h2DropdownItem);
-
+    
+            anchor.appendChild(arrowSpanContainer);
+            menuItem.appendChild(anchor);
             menuItem.appendChild(dropdownMenu);
         } else {
             menuItem.appendChild(anchor);
         }
-
+    
         return menuItem;
-    }
-
+    };
+    
     // Položka v dropdown menu
-    function createDropdownMenuItem(id, text) {
+    const createDropdownMenuItem = (id, text) => {
         const anchor = document.createElement("a");
         anchor.textContent = text;
         anchor.href = `#${id}`;
+        anchor.addEventListener('click', function() {
+            const dropdownMenus = document.querySelectorAll(".dropdown-menu.open");
+            const dropdownArrows = document.querySelectorAll(".dropdown-arrow.open");
+            dropdownMenus.forEach((dropdownMenu) => {
+                dropdownMenu.classList.remove('open');
+            });
+            dropdownArrows.forEach((dropdownArrow) => {
+                dropdownArrow.classList.remove('open');
+            });
+        });
         return anchor;
-    }
-    
+    };
+
     const navigation = document.createElement("nav");
     navigation.classList.add("navigation");
 
@@ -75,12 +96,12 @@ export default function autonav(header, isDropdown, websiteName, logoImage) {
         const index = siblings.indexOf(h2);
         const nextItems = siblings.slice(index + 1);
         const nextH3Items = nextItems.filter(item => item.tagName === "H3");
-    
+
         if (isDropdown && nextH3Items.length > 0) {
             const menuItem = createMenuItem(h2.id, h2.textContent, true);
             navigationMenu.appendChild(menuItem);
             lastH2Item = menuItem;
-    
+
             nextH3Items.forEach(nextItem => {
                 const dropdownMenu = lastH2Item.querySelector(".dropdown-menu");
                 const dropdownItem = createDropdownMenuItem(nextItem.id, nextItem.textContent);
@@ -91,7 +112,6 @@ export default function autonav(header, isDropdown, websiteName, logoImage) {
             navigationMenu.appendChild(menuItem);
         }
     });
-    
 
     navigation.appendChild(navigationMenu);
 
@@ -111,7 +131,6 @@ export default function autonav(header, isDropdown, websiteName, logoImage) {
     // Přidá hotové menu do stránky
     document.body.insertBefore(header, document.body.firstChild);
 
-
     // Funkčnost navigace
     const hamburger = document.querySelector(".navigation__hamburger");
     const navMenu = document.querySelector(".navigation__menu");
@@ -130,15 +149,4 @@ export default function autonav(header, isDropdown, websiteName, logoImage) {
         });
     }
 
-    if (dropdowns) {
-        // dropdown menu aktivace
-        dropdowns.forEach((dropdown) => {
-            dropdown.addEventListener("click", () => {
-                const dropdownMenu = dropdown.querySelector(".dropdown-menu");
-                if (dropdownMenu) {
-                    dropdownMenu.classList.toggle("open");
-                }
-            });
-        });
-    }
 }
