@@ -299,6 +299,9 @@ header{
         transform: rotate(90deg);
     }
 
+    .dropdown-arrow-container:has(.dropdown-arrow.open){
+        top: 5px;
+    }
     
 }
 
