@@ -141,12 +141,36 @@ export default function autonav(header, isDropdown, websiteName, logoImage) {
         hamburger.addEventListener("click", () => {
             hamburger.classList.toggle("active");
             navMenu.classList.toggle("active");
-
+    
             const bars = document.querySelectorAll(".bar");
             bars.forEach((bar) => {
                 bar.classList.toggle("bar--cross");
             });
         });
+    
+        // Close the menu when an item is clicked
+        const navItems = document.querySelectorAll('.menu__item a');
+        navItems.forEach((navItem) => {
+            navItem.addEventListener('click', () => {
+                hamburger.classList.remove("active");
+                navMenu.classList.remove("active");
+    
+                const bars = document.querySelectorAll(".bar");
+                bars.forEach((bar) => {
+                    bar.classList.remove("bar--cross");
+                });
+    
+                const dropdownMenus = document.querySelectorAll(".dropdown-menu.open");
+                const dropdownArrows = document.querySelectorAll(".dropdown-arrow.open");
+                dropdownMenus.forEach((dropdownMenu) => {
+                    dropdownMenu.classList.remove('open');
+                });
+                dropdownArrows.forEach((dropdownArrow) => {
+                    dropdownArrow.classList.remove('open');
+                });
+            });
+        });
     }
+    
 
 }
