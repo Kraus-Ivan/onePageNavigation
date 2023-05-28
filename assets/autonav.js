@@ -84,7 +84,7 @@ export default function autonav(header, isDropdown, websiteName, logoImage) {
 
     navigation.appendChild(logoDiv);
 
-    const navigationMenu = document.createElement("ul");
+    const navigationMenu = document.createElement("menu");
     navigationMenu.classList.add("navigation__menu");
 
     const h2s = Array.from(document.querySelectorAll("h2"));
